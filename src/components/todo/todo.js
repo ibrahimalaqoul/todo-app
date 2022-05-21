@@ -1,14 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import useForm from '../../hooks/form.js';
-
+import React, { useEffect, useState ,useContext} from 'react';
+import List from '../list/list.js';
 import { v4 as uuid } from 'uuid';
+import Form from '../form/form.js';
+import { SettingsContext } from '../../context/settings.js';
+import ReactPaginate from 'react-paginate';
+import { Card, Elevation } from "@blueprintjs/core";
+
 
 const ToDo = () => {
+  
+  const [currentItems, setCurrentItems] = useState([]);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemOffset, setItemOffset] = useState(0);
 
   const [list, setList] = useState([]);
   const [incomplete, setIncomplete] = useState([]);
-  const { handleChange, handleSubmit } = useForm(addItem);
-
+  const [sort, setSort] = useState(false);
+  const settings = useContext(SettingsContext);
+  
   function addItem(item) {
     console.log(item);
     item.id = uuid();
@@ -29,57 +38,83 @@ const ToDo = () => {
       }
       return item;
     });
-
     setList(items);
-
   }
-
+  const handleSort = () => {
+    let items;
+    if(settings.sortBy === 'difficulty'){
+      items=  currentItems.sort((a,b)=>{
+        if(a.difficulty > b.difficulty){
+          return 1;
+        }else if(a.difficulty < b.difficulty){
+          return -1;
+        }
+        return 0;
+      })
+    }
+ 
+    console.log(items);
+    setSort(!sort);
+    setList(items);
+  }
+  
   useEffect(() => {
+    // Fetch items from another resources.
+    const endOffset = itemOffset + settings.numberItems;
+    console.log(`Loading items from ${itemOffset} to ${endOffset}`);
+    setCurrentItems(list.slice(itemOffset, endOffset));
+    setPageCount(Math.ceil(list.length / settings.numberItems));
+  }, [itemOffset, settings.numberItems,list]);
+
+  
+  useEffect(() => {
+    setList(list)
     let incompleteCount = list.filter(item => !item.complete).length;
     setIncomplete(incompleteCount);
     document.title = `To Do List: ${incomplete}`;
-  }, [list]);
+  }, [list,sort,incomplete]);
 
+    const handlePageClick = (event) => {
+    const newOffset = (event.selected * settings.numberItems) % list.length;
+    console.log(
+      `User requested page number ${event.selected}, which is offset ${newOffset}`
+    );
+    setItemOffset(newOffset);
+    };
+
+  
   return (
     <>
       <header>
         <h1>To Do List: {incomplete} items pending</h1>
       </header>
+      <div className='container'>
+      <Card elevation={Elevation.TWO} className='card-form'>
+      <Form addItem={addItem}  handleSort={handleSort}/>
 
-      <form onSubmit={handleSubmit}>
-
-        <h2>Add To Do Item</h2>
-
-        <label>
-          <span>To Do Item</span>
-          <input onChange={handleChange} name="text" type="text" placeholder="Item Details" />
-        </label>
-
-        <label>
-          <span>Assigned To</span>
-          <input onChange={handleChange} name="assignee" type="text" placeholder="Assignee Name" />
-        </label>
-
-        <label>
-          <span>Difficulty</span>
-          <input onChange={handleChange} defaultValue={3} type="range" min={1} max={5} name="difficulty" />
-        </label>
-
-        <label>
-          <button type="submit">Add Item</button>
-        </label>
-      </form>
-
-      {list.map(item => (
-        <div key={item.id} >
-          <p>{item.text}</p>
-          <p><small>Assigned to: {item.assignee}</small></p>
-          <p><small>Difficulty: {item.difficulty}</small></p>
-          <div onClick={() => toggleComplete(item.id)}>Complete: {item.complete.toString()}</div>
-          {/* <button onClick={() => deleteItem(item.id)}>Delete Item</button> */}
-          <hr />
-        </div>
-      ))}
+      </Card>
+      
+      <div className='list-container'>
+      {currentItems.map(item => (
+        
+        <List item={item} deleteItem={deleteItem} toggleComplete={toggleComplete} />
+        
+       ))}
+      </div>
+     
+      </div>
+      <div className='pag'>
+         <ReactPaginate
+        breakLabel="..."
+        nextLabel="next >"
+        onPageChange={handlePageClick}
+        pageRangeDisplayed={5}
+        pageCount={pageCount}
+        previousLabel="< previous"
+        renderOnZeroPageCount={null}
+      />
+      </div>
+      
 
     </>
   );
