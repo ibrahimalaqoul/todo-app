@@ -40,9 +40,12 @@ const ToDo = () => {
     });
     setList(items);
   }
-  const handleSort = () => {
-    let items;
-    if(settings.sortBy === 'difficulty'){
+  const handleSort = (e) => {
+    let items=[];
+    console.log(e);
+
+    switch (e.target.innerText) {
+      case "Sort by Difficulty":
       items=  currentItems.sort((a,b)=>{
         if(a.difficulty > b.difficulty){
           return 1;
@@ -51,8 +54,17 @@ const ToDo = () => {
         }
         return 0;
       })
+      settings.setSortBy("difficulty");
+      break;
+      case "Sort by Assignee":
+      items=  currentItems.sort((a,b)=>{
+       return  a.assignee.localeCompare(b.assignee);   
+      })
+      settings.setSortBy("assignee");
+      break;
+      default: break;
     }
- 
+
     console.log(items);
     setSort(!sort);
     setList(items);
