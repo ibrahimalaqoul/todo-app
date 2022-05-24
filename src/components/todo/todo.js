@@ -14,8 +14,7 @@ const ToDo = () => {
   const [currentItems, setCurrentItems] = useState([]);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
-
-  const [list, setList] = useState([]);
+  const [list, setList] = useState(JSON.parse(localStorage.getItem('list'))||[]);
   const [incomplete, setIncomplete] = useState([]);
   const [sort, setSort] = useState(false);
   const settings = useContext(SettingsContext);
@@ -26,6 +25,7 @@ const ToDo = () => {
     item.id = uuid();
     item.complete = false;
     setList([...list, item]);
+
   }
 
   function deleteItem(id) {
@@ -74,6 +74,11 @@ const ToDo = () => {
     setSort(!sort);
     setList(items);
   }
+  useEffect(() => {
+   if(list){
+     localStorage.setItem('list', JSON.stringify(list));
+   }
+  }, [list]);
 
   useEffect(() => {
     const endOffset = itemOffset + settings.numberItems;
