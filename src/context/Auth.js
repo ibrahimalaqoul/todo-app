@@ -11,10 +11,11 @@ export default function Auth(props){
     const [isLoggedIn,setIsLoggedIn] = useState(false);
 
 
-    const signUp = (username,password) => {
+    const signUp = (username,password,role) => {
         axios.post("https://my-api-ibra.herokuapp.com/signup",{
-            username,
-            password,
+            username : username,
+            password : password,
+            role : role,
         }).then(res => {
             console.log(res.data);
         })
@@ -37,6 +38,7 @@ export default function Auth(props){
     }
     const authurized = (action) => {
         return user?.actions?.includes(action);
+
     }
     const validateToken = (res) => {
         if(res){
