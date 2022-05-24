@@ -34,14 +34,16 @@ const ToDo = () => {
   }
 
   function toggleComplete(id) {
-
-    const items = list.map(item => {
+    if(auth.authurized('update')){
+      const items = list.map(item => {
       if (item.id === id) {
         item.complete = !item.complete;
       }
       return item;
     });
     setList(items);
+    }
+
   }
   const handleSort = (e) => {
     let items = [];
@@ -74,7 +76,6 @@ const ToDo = () => {
   }
 
   useEffect(() => {
-    // Fetch items from another resources.
     const endOffset = itemOffset + settings.numberItems;
     console.log(`Loading items from ${itemOffset} to ${endOffset}`);
     setCurrentItems(list.slice(itemOffset, endOffset));
@@ -100,7 +101,6 @@ const ToDo = () => {
 
   return (
     <>
-    
       <header className='headerclass'>
         <h1>To Do List: {incomplete} items pending</h1>
         <When condition={auth.isLoggedIn}>
@@ -115,6 +115,7 @@ const ToDo = () => {
           <Form addItem={addItem} handleSort={handleSort} />
 
         </Card>
+        <When condition={auth.isLoggedIn}>
 
         <div className='list-container'>
           {currentItems.map(item => (
@@ -123,8 +124,12 @@ const ToDo = () => {
 
           ))}
         </div>
+        </When>
+
 
       </div>
+      <When condition={auth.isLoggedIn}>
+
       <div className='pag'>
         <ReactPaginate
           breakLabel="..."
@@ -136,7 +141,7 @@ const ToDo = () => {
           renderOnZeroPageCount={null}
         />
       </div>
-
+      </When>
 
     </>
   );
