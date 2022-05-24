@@ -16,5 +16,5 @@
 
 # Links:
 
-* [PR](https://github.com/ibrahimalaqoul/todo-app/pull/5)
+* [PR](https://github.com/ibrahimalaqoul/todo-app/pull/6)
 * [APP LINK](https://peaceful-kitsune-0d4265.netlify.app/)
